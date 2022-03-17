@@ -1,7 +1,5 @@
 from django.db import models
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from users.models import User
 
 
 class Ingredient(models.Model):
@@ -39,9 +37,39 @@ class Recipe(models.Model):
     image = models.ImageField(upload_to='recipes/',
         blank=True,
         null=True)
-    ingredient = models.ForeignKey(Ingredient,on_delete=models.CASCADE, blank=True, null=True)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE, blank=True, null=True)
+    ingredient = models.ManyToManyField(Ingredient, related_name='recipes')
+    tag = models.ManyToManyField(Tag, related_name='recipes')
     cooking_time = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
+
+
+class Follow(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='following',
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=('user', 'author'),
+                name='unique_list'
+            )
+        ]
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=('user', 'recipe'),
+                name='unique_recipe'
+            )
+        ]
