@@ -8,4 +8,4 @@ from .permissions import IsAdmin
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    permission_classes = (IsAuthenticated, IsAdmin,)
+    # permission_classes = (IsAuthenticated, IsAdmin,)
