@@ -1,6 +1,6 @@
 from csv import list_dialects
 from django.contrib import admin
-from .models import Recipe, Tag, Ingredient, Follow
+from .models import Recipe, Tag, Ingredient, Follow, Favorite, ShoppingCart
 
 from users.models import User
 
@@ -22,11 +22,22 @@ class IngredientAdmin(admin.ModelAdmin):
     list_display = ('name', 'amount', 'unit')
     ordering = ('name',)
 
+
 class FollowAdmin(admin.ModelAdmin):
     list_display = ('user', 'author')
+
+
+class FavoriteAdmin(admin.ModelAdmin):
+    pass
+
+
+class ShoppingCartAdmin(admin.ModelAdmin):
+    pass
 
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(Follow, FollowAdmin)
+admin.site.register(Favorite, FavoriteAdmin)
+admin.site.register(ShoppingCart, ShoppingCartAdmin)

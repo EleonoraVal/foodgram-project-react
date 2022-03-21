@@ -3,10 +3,10 @@ from recipes.models import Recipe, Tag, Ingredient, Follow
 from users.models import User
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
-from users.permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnly
 
 from .serializers import (TagSerializer, IngredientSerializer,
-                          RecipeSerializer, FollowSerializer)
+                          RecipeSerializer, FollowSerializer, FavoriteSerializer)
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -36,3 +36,10 @@ class FollowViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class FavoriteViewSet(viewsets.ModelViewSet):
+    serializer_class = FavoriteSerializer
+
+    def get_queryset(self):
+        return self.request.user.favorite_recipe.all()

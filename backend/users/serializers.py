@@ -31,12 +31,7 @@ class UserSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
+            password=validated_data['password']
         )
-        user.set_password(validated_data['password'])
         user.save()
         return user
-        # try:
-        #     with transaction.atomic():
-        #         return User.objects.create_user(**validated_data)
-        # except IntegrityError:
-        #     self.fail('Нет пользователя')
