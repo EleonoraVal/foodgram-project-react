@@ -1,3 +1,4 @@
+from colorfield.fields import ColorField
 from django.db import models
 from users.models import User
 
@@ -16,7 +17,7 @@ class Ingredient(models.Model):
 
     def __str__(self):
         return f'{self.name}, {self.amount}, {self.unit}'
-    
+
 
 class Tag(models.Model):
     name = models.CharField(
@@ -24,10 +25,9 @@ class Tag(models.Model):
         unique=True,
         null=True
     )
-    color = models.CharField(
-        max_length=6,
-        blank=True,
-        null=True,
+    color = ColorField(
+        format='hexa',
+        unique=True,
         default='0000FF'
     )
     slug = models.SlugField(
@@ -108,6 +108,7 @@ class Favorite(models.Model):
                 name='unique_recipe'
             )
         ]
+
 
 class ShoppingCart(models.Model):
     user = models.ForeignKey(

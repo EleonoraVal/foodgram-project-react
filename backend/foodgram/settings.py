@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'recipes',
     'api',
     'users',
-    'djoser'
+    'djoser',
+    'colorfield'
 ]
 
 MIDDLEWARE = [
@@ -93,22 +94,26 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME':
+            'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny', # IsAuthenticatedOrReadOnly
+        'rest_framework.permissions.AllowAny',  # IsAuthenticatedOrReadOnly
     ],
     # 'DEFAULT_AUTHENTICATION_CLASSES': [
     #     'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -117,7 +122,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ],
 
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 6,
 }
 
@@ -156,13 +162,13 @@ DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
     'PERMISSIONS': {
-        'user': ('api.permissions.IsOwnerOrReadOnly',),
+        'user': ('rest_framework.permissions.AllowAny',),
         'user_list': ('api.permissions.IsOwnerOrReadOnly',),
     },
     'SERIALIZERS': {
         'user': 'users.serializers.UserSerializer',
         'user_list': 'users.serializers.UserSerializer',
-        'current_user': 'users.serializers.UserSerializer',
+        'current_user': 'djoser.serializers.UserSerializer',
         'user_create': 'users.serializers.UserSerializer',
     },
 }

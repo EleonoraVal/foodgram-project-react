@@ -9,6 +9,7 @@ CHOICES = (
     (ADMIN, 'администратор')
 )
 
+
 class User(AbstractUser):
     first_name = models.CharField(
         max_length=50,

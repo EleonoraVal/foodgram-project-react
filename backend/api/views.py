@@ -1,22 +1,25 @@
 from rest_framework import viewsets
 from recipes.models import Recipe, Tag, Ingredient, Follow
-from users.models import User
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsAdmin
 
 from .serializers import (TagSerializer, IngredientSerializer,
-                          RecipeSerializer, FollowSerializer, FavoriteSerializer)
+                          RecipeSerializer, FollowSerializer,
+                          FavoriteSerializer)
 
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
+    permission_classes = [IsAdmin, ]
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    pagination_class = None
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

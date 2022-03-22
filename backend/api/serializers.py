@@ -1,4 +1,5 @@
-from recipes.models import Recipe, Tag, Ingredient, Follow, Favorite, ShoppingCart
+from recipes.models import (Recipe, Tag, Ingredient,
+                            Follow, Favorite, ShoppingCart)
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 from users.models import User
@@ -8,14 +9,14 @@ class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Ingredient
-        fields = ('name', 'amount', 'unit')
+        fields = ('id', 'name', 'amount', 'unit')
 
 
 class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ('name', 'slug', 'color')
+        fields = ('id','name', 'slug', 'color')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -24,16 +25,25 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'name', 'text', 'author', 'image', 'ingredient', 'tag', 'cooking_time')
+        fields = (
+            'id',
+            'name',
+            'text',
+            'author',
+            'image',
+            'ingredient',
+            'tag',
+            'cooking_time'
+        )
 
-    # def create(self, instance, **validated_data):
-    #     tag = validated_data.pop('tag')
-    #     # recipe = Recipe.objects.create(**validated_data)
-    #     # # recipe.tag.set(tag)
-    #     for tags in tag:
-    #         current_tag = Tag.objects.get_or_create(**tags)
-    #     instance.tags.add(current_tag)
-    #     return instance
+    def create(self, validated_data):
+        ingredients = validated_data.pop('ingredients')
+        tag = validated_data.pop('tag')
+        recipe = Recipe.objects.create(**validated_data)
+        self.create_ingredients(recipe, ingredients)
+        recipe.tags.set(tag)
+        return recipe
+
 
 class FollowSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
@@ -75,6 +85,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
                 fields=('id', 'name')
             )
         ]
+
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
 

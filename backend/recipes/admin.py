@@ -1,11 +1,12 @@
-from csv import list_dialects
 from django.contrib import admin
 from .models import Recipe, Tag, Ingredient, Follow, Favorite, ShoppingCart
 
 from users.models import User
 
+
 class UserAdmin(admin.ModelAdmin):
     list_display = ('username', 'first_name', 'last_name', 'email')
+
 
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'author', 'cooking_time')
@@ -33,6 +34,7 @@ class FavoriteAdmin(admin.ModelAdmin):
 
 class ShoppingCartAdmin(admin.ModelAdmin):
     pass
+
 
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Tag, TagAdmin)
