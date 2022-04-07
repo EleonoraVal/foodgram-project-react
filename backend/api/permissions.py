@@ -1,17 +1,45 @@
 from rest_framework import permissions
+from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 
 
-class IsAdmin(permissions.BasePermission):
+class AllowAny(IsAuthenticated):
     def has_permission(self, request, view):
-        return (
-            request.method in ('GET',)
-            or request.user.is_authenticated
-            and request.user.is_admin
-        )
+        return request.method in SAFE_METHODS or request.method == 'POST'
 
 
-class IsOwnerOrReadOnly(permissions.BasePermission):
+class CurrentUserOrAdmin(IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        return user.is_admin() or obj.id == user.id
+
+
+class IsAdminOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if request.user.is_anonymous:
+            return False
+        return request.user.is_admin
+
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        return obj.author == request.user
+        if request.user.is_anonymous:
+            return False
+        return request.user.is_admin
+
+
+class IsAdminAuthorOrReadPost(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in SAFE_METHODS or request.method == 'POST':
+            return True
+        if request.user.is_anonymous:
+            return False
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS or request.method == 'POST':
+            return True
+        if request.user.is_anonymous:
+            return False
+        return request.user.is_admin or obj.author == request.user

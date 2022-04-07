@@ -5,25 +5,21 @@ from users.models import User
 
 class Ingredient(models.Model):
     name = models.CharField(
-        max_length=30,
-        unique=True,
-        null=True
+        max_length=200,
     )
-    amount = models.IntegerField(default=0)
-    unit = models.TextField()
+    measurement_unit = models.CharField(max_length=200)
 
     class Meta:
         ordering = ('name',)
 
     def __str__(self):
-        return f'{self.name}, {self.amount}, {self.unit}'
+        return f'{self.name}, {self.measurement_unit}'
 
 
 class Tag(models.Model):
     name = models.CharField(
-        max_length=30,
+        max_length=200,
         unique=True,
-        null=True
     )
     color = ColorField(
         format='hexa',
@@ -31,8 +27,8 @@ class Tag(models.Model):
         default='0000FF'
     )
     slug = models.SlugField(
-        max_length=30,
-        unique=True
+        max_length=200,
+        unique=True,
     )
 
     class Meta:
@@ -45,36 +41,60 @@ class Tag(models.Model):
 class Recipe(models.Model):
     name = models.CharField(
         max_length=200,
-        null=True
     )
     text = models.TextField()
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through='IngredientRecipe',
+        related_name='recipes',
+    )
+    tags = models.ManyToManyField(
+        Tag,
         related_name='recipes'
     )
     image = models.ImageField(
         upload_to='recipes/',
         blank=True,
-        null=True)
-    ingredient = models.ManyToManyField(
-        Ingredient,
-        related_name='recipes'
+        null=True
+        )
+    cooking_time = models.IntegerField(default=1)
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='recipes',
     )
-    tag = models.ManyToManyField(
-        Tag,
-        related_name='recipes'
-    )
-    cooking_time = models.IntegerField(default=0)
+    pub_date = models.DateTimeField(
+        auto_now_add=True)
+
+    class Meta:
+        ordering = ('-pub_date',)
 
     def __str__(self):
         return self.name
 
 
+class IngredientRecipe(models.Model):
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='ingredient_amount'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='ingredient_amount'
+    )
+    amount = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f'{self.ingredient.name} in {self.recipe.name}'
+
+
 class Follow(models.Model):
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='follower'
     )
     author = models.ForeignKey(
         User,
@@ -86,7 +106,7 @@ class Follow(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=('user', 'author'),
-                name='unique_list'
+                name='unique_follow'
             )
         ]
 
@@ -94,11 +114,13 @@ class Follow(models.Model):
 class Favorite(models.Model):
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='follower_favorite'
     )
     recipe = models.ForeignKey(
         Recipe,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='following_favorite'
     )
 
     class Meta:
@@ -109,15 +131,20 @@ class Favorite(models.Model):
             )
         ]
 
+    def __str__(self):
+        return f'{self.user.username} follows {self.recipe.name}'
+
 
 class ShoppingCart(models.Model):
     user = models.ForeignKey(
         User,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='cart_follower'
     )
     recipe = models.ForeignKey(
         Recipe,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='cart'
     )
 
     class Meta:
