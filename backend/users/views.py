@@ -1,15 +1,15 @@
-from rest_framework import viewsets
+from api.pagination import LimitPageSizePagination
+from api.permissions import AllowAny
+from api.serializers import FollowSerializer, SubscriptionSerializer
 from django.shortcuts import get_object_or_404
-from rest_framework.response import Response
-from rest_framework import status
-from .models import User
 from recipes.models import Follow
-from api.serializers import SubscriptionSerializer, FollowSerializer
-from .serializers import UserSerializer
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from api.permissions import AllowAny
-from api.pagination import LimitPageSizePagination
+from rest_framework.response import Response
+
+from .models import User
+from .serializers import UserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):

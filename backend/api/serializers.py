@@ -1,9 +1,9 @@
-from django.shortcuts import get_object_or_404
 from django.forms import ValidationError
-from recipes.models import (Recipe, Tag, Ingredient,
-                            Follow, Favorite, ShoppingCart, IngredientRecipe)
-from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
+from recipes.models import (Favorite, Follow, Ingredient, IngredientRecipe,
+                            Recipe, ShoppingCart, Tag)
+from rest_framework import serializers
 from users.serializers import UserSerializer
 
 

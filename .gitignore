@@ -132,3 +132,7 @@ dmypy.json
 .idea
 
 .vscode/
+
+# папки со статикой и медиа
+backend/static
+backend/media

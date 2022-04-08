@@ -1,24 +1,24 @@
 from django.db.models import Sum
 from django.http import HttpResponse
-from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from rest_framework import status
-from rest_framework import viewsets
+from recipes.models import (Favorite, Follow, Ingredient, IngredientRecipe,
+                            Recipe, ShoppingCart, Tag)
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from recipes.models import (Recipe, Tag, Ingredient, Follow,
-                            Favorite, ShoppingCart, IngredientRecipe)
-from rest_framework.permissions import IsAuthenticated
-from .permissions import IsAdminAuthorOrReadPost, IsAdminOrReadOnly
-from .pagination import LimitPageSizePagination
+from reportlab.pdfgen.canvas import Canvas
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from .serializers import (TagSerializer, IngredientSerializer,
-                          RecipeSerializer, FollowSerializer,
-                          FavoriteSerializer, RecipeCreateSerializer)
-from .filters import (FavoriteFilter, ShoppingCartFilter,
-                      AuthorFilter, TagFilter)
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from .filters import (AuthorFilter, FavoriteFilter, ShoppingCartFilter,
+                      TagFilter)
+from .pagination import LimitPageSizePagination
+from .permissions import IsAdminAuthorOrReadPost, IsAdminOrReadOnly
+from .serializers import (FavoriteSerializer, FollowSerializer,
+                          IngredientSerializer, RecipeCreateSerializer,
+                          RecipeSerializer, TagSerializer)
 
 
 class TagViewSet(viewsets.ModelViewSet):
