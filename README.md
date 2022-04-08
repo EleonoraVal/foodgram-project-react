@@ -17,5 +17,3 @@ python3 manage.py runserver
 ```
 ### Авторы
 Элеонора Дырда 
-
-https://dillinger.io
