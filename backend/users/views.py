@@ -1,12 +1,13 @@
-from api.pagination import LimitPageSizePagination
-from api.permissions import AllowAny
-from api.serializers import FollowSerializer, SubscriptionSerializer
 from django.shortcuts import get_object_or_404
-from recipes.models import Follow
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from api.pagination import LimitPageSizePagination
+from api.permissions import AllowAny
+from api.serializers import FollowSerializer, SubscriptionSerializer
+from recipes.models import Follow
 
 from .models import User
 from .serializers import UserSerializer

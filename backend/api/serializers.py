@@ -1,9 +1,9 @@
-from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+
 from recipes.models import (Favorite, Follow, Ingredient, IngredientRecipe,
                             Recipe, ShoppingCart, Tag)
-from rest_framework import serializers
 from users.serializers import UserSerializer
 
 
@@ -113,53 +113,39 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         data['ingredients'] = ingredients_data
         return data
 
+    def add_ingredients(self, recipe, ingredients_data):
+        for ingredient in ingredients_data:
+            IngredientRecipe.objects.create(
+                ingredient_id=ingredient.get('id'),
+                recipe=recipe,
+                amount=ingredient.get('amount')
+            )
+
     def create(self, validated_data):
         author = self.context['request'].user
-        image = validated_data.pop('image')
-        ingredients_data = validated_data.pop('ingredients')
-        recipe = Recipe.objects.create(author=author,
-                                       image=image,
-                                       **validated_data)
+        ingredients = validated_data.pop('ingredients')
         tags = self.initial_data.get('tags')
+        recipe = Recipe.objects.create(author=author, **validated_data)
+        self.add_ingredients(recipe, ingredients)
         recipe.tags.set(tags)
-        for ingredient in ingredients_data:
-            id = ingredient.get('id')
-            amount = int(ingredient.get('amount'))
-            IngredientRecipe.objects.create(
-                ingredient_id=id,
-                recipe=recipe,
-                amount=amount
-            )
         return recipe
 
-    def update(self, instance, validated_data):
-        IngredientRecipe.objects.filter(recipe=instance).all().delete()
-        ingredients_data = validated_data.pop('ingredients')
-        tags_data = validated_data.pop('tags')
-        instance.name = validated_data.get('name', instance.name)
-        instance.text = validated_data.get('text', instance.text)
-        instance.image = validated_data.get('image', instance.image)
-        instance.cooking_time = validated_data.get(
-            'cooking_time', instance.cooking_time)
-        instance.tags.clear()
-        instance.tags.set(tags_data)
-        for ingredient in ingredients_data:
-            id, amount = ingredient['id'], ingredient['amount']
-            ingredient_to_add = get_object_or_404(Ingredient, id=id)
-            IngredientRecipe.objects.create(
-                ingredient=ingredient_to_add,
-                recipe=instance, amount=amount
-            )
-        instance.save()
-        return instance
+    def update(self, request, validated_data):
+        ingredients = validated_data.pop('ingredients')
+        tags = self.initial_data.get('tags')
+        recipe = Recipe.objects.get(pk=request.id)
+        recipe.ingredients.clear()
+        recipe.tags.set(tags)
+        self.add_ingredients(recipe, ingredients)
+        return super().update(recipe, validated_data)
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(source='author.email')
-    id = serializers.EmailField(source='author.id')
-    username = serializers.EmailField(source='author.username')
-    first_name = serializers.EmailField(source='author.first_name')
-    last_name = serializers.EmailField(source='author.last_name')
+    email = serializers.ReadOnlyField(source='author.email')
+    id = serializers.ReadOnlyField(source='author.id')
+    username = serializers.ReadOnlyField(source='author.username')
+    first_name = serializers.ReadOnlyField(source='author.first_name')
+    last_name = serializers.ReadOnlyField(source='author.last_name')
     is_subscribed = serializers.SerializerMethodField(
         read_only=True,
         method_name='get_is_subscribed')
@@ -201,18 +187,6 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         model = Follow
         fields = ('user', 'author')
 
-    def validate(self, obj):
-        user = obj['user']
-        author = obj['author']
-        request_method = self.context.get('request').method
-        subscribed = Follow.objects.filter(
-            user=user, author=author).exists()
-        if subscribed and request_method == 'POST':
-            raise ValidationError('На этого автора уже есть подписка!')
-        if not subscribed and request_method == 'DELETE':
-            raise ValidationError('На этого автора подписки не было!')
-        return obj
-
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
@@ -221,26 +195,6 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
         read_only_fields = ('id', 'name', 'image', 'cooking_time')
-
-    def validate(self, data):
-        request = self.context['request']
-        if request.method == 'POST':
-            recipe_id = self.context['view'].kwargs.get('id')
-            recipe = get_object_or_404(Recipe, id=recipe_id)
-            if ShoppingCart.objects.filter(
-                                           user=request.user,
-                                           recipe=recipe).exists():
-                raise serializers.ValidationError(
-                    'Рецепт уже есть в списке покупок!'
-                )
-        if request.method == 'DELETE':
-            if not ShoppingCart.objects.filter(
-                                               user=request.user,
-                                               recipe=recipe).exists():
-                raise serializers.ValidationError(
-                    'Рецепт не был в списке покупок!'
-                )
-        return data
 
     def create(self, validated_data):
         user = self.context['request'].user
@@ -257,20 +211,6 @@ class FavoriteRecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
         read_only_fields = ('id', 'name', 'image', 'cooking_time')
-
-    def validate(self, data):
-        request = self.context['request']
-        if request.method == 'POST':
-            recipe_id = self.context['view'].kwargs.get('id')
-            recipe = get_object_or_404(Recipe, id=recipe_id)
-            if Favorite.objects.filter(user=request.user,
-                                       recipe=recipe).exists():
-                raise ValidationError('Рецепт уже в избранном!')
-        if request.method == 'DELETE':
-            if not Favorite.objects.filter(user=request.user,
-                                           recipe=recipe).exists():
-                raise ValidationError('Рецепт не был в списке избранного!')
-        return data
 
     def create(self, validated_data):
         user = self.context['request'].user

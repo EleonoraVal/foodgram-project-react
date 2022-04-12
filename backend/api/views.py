@@ -1,8 +1,6 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from recipes.models import (Favorite, Follow, Ingredient, IngredientRecipe,
-                            Recipe, ShoppingCart, Tag)
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -11,6 +9,9 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
+from recipes.models import (Favorite, Follow, Ingredient, IngredientRecipe,
+                            Recipe, ShoppingCart, Tag)
 
 from .filters import (AuthorFilter, FavoriteFilter, ShoppingCartFilter,
                       TagFilter)
@@ -47,25 +48,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeSerializer
         return RecipeCreateSerializer
 
-    def destroy(self, request, pk=None):
-        user = self.request.user
-        obj = self.get_object()
-        if not user.is_authenticated:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
-        if user.is_admin or obj.author == user:
-            obj.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_403_FORBIDDEN)
-
     @action(detail=True, methods=('post', 'delete'),
             permission_classes=(IsAuthenticated, ))
     def favorite(self, request, pk):
         user = self.request.user
         recipe = get_object_or_404(Recipe, id=pk)
-        is_already_follow = Favorite.objects.filter(user=user,
-                                                    ecipe=recipe)
         if request.method == 'POST':
-            if is_already_follow:
+            if Favorite.objects.filter(user=request.user,
+                                       recipe=recipe).exists():
                 return Response('Рецепт уже был добавлен '
                                 f'{recipe.name} (id - {pk})',
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -78,7 +68,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
                                 status=status.HTTP_201_CREATED
                                 )
         if request.method == 'DELETE':
-            if is_already_follow:
+            if not Favorite.objects.filter(user=request.user,
+                                           recipe=recipe).exists():
                 follower_favorite = get_object_or_404(
                     Favorite,
                     user=user,
@@ -112,19 +103,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @staticmethod
-    def canvas_method(dictionary):
+    def canvas_method(shopping_list):
         begin_position_x, begin_position_y = 30, 730
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = (
             'attachment; filename="shopping_cart.pdf"')
         canvas = Canvas(response, pagesize=A4)
-        pdfmetrics.registerFont(TTFont('FreeSans', 'media/fonts/FreeSans.ttf'))
+        pdfmetrics.registerFont(TTFont('FreeSans', 'data/fonts/FreeSans.ttf'))
         canvas.setFont('FreeSans', 25)
         canvas.setTitle('Список покупок')
         canvas.drawString(begin_position_x,
                           begin_position_y + 40, 'Список покупок: ')
         canvas.setFont('FreeSans', 18)
-        for number, item in enumerate(dictionary, start=1):
+        for number, item in enumerate(shopping_list, start=1):
             if begin_position_y < 100:
                 begin_position_y = 730
                 canvas.showPage()

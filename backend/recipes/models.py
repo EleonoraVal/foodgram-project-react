@@ -1,5 +1,7 @@
 from colorfield.fields import ColorField
+from django.core.validators import MinValueValidator
 from django.db import models
+
 from users.models import User
 
 
@@ -57,7 +59,10 @@ class Recipe(models.Model):
         blank=True,
         null=True
         )
-    cooking_time = models.IntegerField(default=1)
+    cooking_time = models.IntegerField(
+        default=1,
+        validators=[MinValueValidator(1)]
+    )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -84,7 +89,10 @@ class IngredientRecipe(models.Model):
         on_delete=models.CASCADE,
         related_name='ingredient_amount'
     )
-    amount = models.IntegerField(default=1)
+    amount = models.IntegerField(
+        default=1,
+        validators=[MinValueValidator(1)]
+    )
 
     def __str__(self):
         return f'{self.ingredient.name} in {self.recipe.name}'
