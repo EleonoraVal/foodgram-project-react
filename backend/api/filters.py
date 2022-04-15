@@ -24,7 +24,7 @@ class FavoriteFilter(filters.BaseFilterBackend):
         if is_favorited != '1':
             return queryset
         if user.is_authenticated:
-            return queryset.filter(following__user=user)
+            return queryset.filter(following_favorite__user=user)
         return None
 
 

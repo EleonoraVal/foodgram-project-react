@@ -58,15 +58,11 @@ class UserViewSet(viewsets.ModelViewSet):
                     data=serializer.data,
                     status=status.HTTP_201_CREATED
                 )
-            return Response('Подписка уже была оформлена '
-                            f'{author.username} (id - {pk})',
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         if request.method == 'DELETE':
             if is_already_follow:
                 Follow.objects.filter(user=user, author=author).delete()
                 return Response('Подписка удалена',
                                 status=status.HTTP_204_NO_CONTENT)
-            return Response('Подписки на этого автора не было!'
-                            f'{author.username} (id - {pk})',
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
