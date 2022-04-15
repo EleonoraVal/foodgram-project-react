@@ -17,13 +17,9 @@ from .filters import (AuthorFilter, FavoriteFilter, ShoppingCartFilter,
                       TagFilter)
 from .pagination import LimitPageSizePagination
 from .permissions import IsAdminAuthorOrReadPost, IsAdminOrReadOnly
-# from .serializers import (FollowSerializer,
-#                           IngredientSerializer, RecipeCreateSerializer,
-#                           RecipeSerializer, TagSerializer, FavoriteSerializer, ShoppingCartSerializer)
-from .serializers import (FollowSerializer, ShoppingCartSerializer,
+from .serializers import (FollowSerializer,
                           IngredientSerializer, RecipeCreateSerializer,
                           RecipeSerializer, TagSerializer, FavoriteSerializer)
-
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -58,7 +54,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = self.request.user
         recipe = get_object_or_404(Recipe, id=pk)
         is_already_added = model.objects.filter(user=user,
-                                                          recipe=recipe)
+                                                recipe=recipe)
         if request.method == 'POST':
             if is_already_added:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -101,61 +97,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             FavoriteSerializer,
             pk
         )
-
-    # @action(detail=True, methods=('post', 'delete'),
-    #         permission_classes=(IsAuthenticated, ))
-    # def favorite(self, request, pk):
-    #     user = self.request.user
-    #     recipe = get_object_or_404(Recipe, id=pk)
-    #     is_already_added = Favorite.objects.filter(user=user,
-    #                                                       recipe=recipe)
-    #     if request.method == 'POST':
-    #         if is_already_added:
-    #             return Response(status=status.HTTP_400_BAD_REQUEST)
-    #         else:
-    #             Favorite.objects.create(user=user, recipe=recipe)
-    #             serializer = FavoriteSerializer(
-    #                 recipe, context={'request': request}
-    #             )
-    #             return Response(serializer.data,
-    #                             status=status.HTTP_201_CREATED
-    #                             )
-    #     if request.method == 'DELETE':
-    #         if is_already_added:
-    #             follower_favorite = get_object_or_404(
-    #                 Favorite,
-    #                 user=user,
-    #                 recipe=recipe
-    #             )
-    #             follower_favorite.delete()
-    #             return Response(status=status.HTTP_204_NO_CONTENT)
-    #         else:
-    #             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    # @action(detail=True, methods=('post', 'delete'),
-    #         permission_classes=(IsAuthenticated,))
-    # def shopping_cart(self, request, pk):
-    #     user = self.request.user
-    #     recipe = get_object_or_404(Recipe, id=pk)
-    #     is_already_added = ShoppingCart.objects.filter(
-    #         user=user, recipe=recipe).exists()
-    #     if request.method == 'POST':
-    #         if is_already_added:
-    #             return Response(status=status.HTTP_400_BAD_REQUEST)
-    #         else:
-    #             ShoppingCart.objects.create(user=user, recipe=recipe)
-    #             serializer = FavoriteSerializer(
-    #                 recipe, context={'request': request})
-    #             return Response(serializer.data,
-    #                             status=status.HTTP_201_CREATED)
-    #     if request.method == 'DELETE':
-    #         if is_already_added:
-    #             ShoppingCart.objects.filter(user=user, recipe=recipe).delete()
-    #             return Response(status=status.HTTP_204_NO_CONTENT)
-    #         else:
-    #             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    #     return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     @staticmethod
     def canvas_method(shopping_list):
@@ -217,10 +158,3 @@ class FollowViewSet(viewsets.ModelViewSet):
             'view': self,
             'recipes_limit': recipes_limit
         }
-
-
-# class FavoriteViewSet(viewsets.ModelViewSet):
-#     serializer_class = FavoriteSerializer
-
-#     def get_queryset(self):
-#         return self.request.user.favorite_recipe.all()
