@@ -14,7 +14,7 @@ from recipes.models import (Favorite, Follow, Ingredient, IngredientRecipe,
                             Recipe, ShoppingCart, Tag)
 
 from .filters import (AuthorFilter, FavoriteFilter, ShoppingCartFilter,
-                      TagFilter)
+                      TagFilter, IngredientSearchFilter)
 from .pagination import LimitPageSizePagination
 from .permissions import IsAdminAuthorOrReadPost, IsAdminOrReadOnly
 from .serializers import (FollowSerializer,
@@ -34,6 +34,8 @@ class IngredientViewSet(viewsets.ModelViewSet):
     serializer_class = IngredientSerializer
     permission_classes = [IsAdminOrReadOnly, ]
     pagination_class = None
+    filter_backends = (IngredientSearchFilter,)
+    search_fields = ('^name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

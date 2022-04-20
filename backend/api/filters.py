@@ -1,4 +1,5 @@
 from rest_framework import filters
+from rest_framework.filters import SearchFilter
 
 
 class TagFilter(filters.BaseFilterBackend):
@@ -37,3 +38,6 @@ class ShoppingCartFilter(filters.BaseFilterBackend):
         if user.is_authenticated:
             return queryset.filter(cart__user=user)
         return None
+
+class IngredientSearchFilter(SearchFilter):
+    search_param = 'name'
