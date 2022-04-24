@@ -2,7 +2,7 @@ from rest_framework import permissions
 from rest_framework.permissions import SAFE_METHODS, IsAuthenticated
 
 
-class AllowAny(IsAuthenticated):
+class AllowAnyGetPost(IsAuthenticated):
     def has_permission(self, request, view):
         return request.method in SAFE_METHODS or request.method == 'POST'
 

@@ -1,4 +1,5 @@
 from django.db.models import Sum
+from django_filters import rest_framework
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from reportlab.lib.pagesizes import A4
@@ -145,6 +146,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 class FollowViewSet(viewsets.ModelViewSet):
     serializer_class = FollowSerializer
     pagination_class = LimitPageSizePagination
+    filter_backends = (rest_framework.DjangoFilterBackend,)
     permission_classes = [IsAuthenticated, ]
 
     def get_queryset(self):

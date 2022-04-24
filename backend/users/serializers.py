@@ -2,26 +2,24 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from users.models import User
+from recipes.models import Follow
 
 
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(
-        required=True,
-        validators=[UniqueValidator(queryset=User.objects.all())]
-    )
-    email = serializers.EmailField(
-        required=True,
-        validators=[UniqueValidator(queryset=User.objects.all())]
+    is_subscribed = serializers.SerializerMethodField(
+        method_name='get_is_subscribed'
     )
 
     class Meta:
         model = User
         fields = (
+            'id',
             'first_name',
             'last_name',
             'username',
             'email',
-            'password'
+            'password',
+            'is_subscribed'
         )
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -36,3 +34,10 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if user.is_authenticated:
+            return Follow.objects.filter(
+                user=user, author=obj.id).exists()
+        return False
